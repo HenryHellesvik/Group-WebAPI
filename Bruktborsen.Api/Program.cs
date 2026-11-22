@@ -1,5 +1,9 @@
+using System.Text.Json.Serialization;
 using Bruktborsen.Api.Data;
+using Bruktborsen.Api.Middleware;
 using Bruktborsen.Api.Models;
+using Bruktborsen.Api.Repository;
+using Bruktborsen.Api.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -17,7 +21,18 @@ builder.Services
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>();
 
-builder.Services.AddControllers();
+// Repository og services
+builder.Services.AddScoped<IListingRepository, ListingRepository>();
+builder.Services.AddScoped<IOfferRepository, OfferRepository>();
+builder.Services.AddScoped<IOfferService, OfferService>();
+
+// Global feilhåndtering: ApiException -> ProblemDetails med riktig statuskode
+builder.Services.AddProblemDetails();
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+
+// Enums som tekst ("Pending") i JSON, på samme måte som i databasen
+builder.Services.AddControllers()
+    .AddJsonOptions(o => o.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 builder.Services.AddOpenApi();
 
 var app = builder.Build();
@@ -27,6 +42,7 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
+app.UseExceptionHandler();
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
