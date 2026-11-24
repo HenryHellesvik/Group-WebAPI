@@ -6,8 +6,6 @@ using Bruktborsen.Api.Repository;
 using Bruktborsen.Api.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Bruktborsen.Api.Repository;
-using Bruktborsen.Api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -40,7 +38,6 @@ builder.Services.AddControllers()
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 
-builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 
 var app = builder.Build();

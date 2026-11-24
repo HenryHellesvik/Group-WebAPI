@@ -1,6 +1,3 @@
 @Bruktborsen.Api_HostAddress = http://localhost:5242
 
-GET {{Bruktborsen.Api_HostAddress}}/weatherforecast/
-Accept: application/json
-
 ###

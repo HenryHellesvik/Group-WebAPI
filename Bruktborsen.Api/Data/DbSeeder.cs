@@ -29,9 +29,9 @@ public static class DbSeeder
         }
         
         await EnsureUserAsync(userManager, "admin@brukt.no", "Admin Adminsen", AdminRole);
-        var ole  = await EnsureUserAsync(userManager, "ole@brukt.no",  "Ole Duck", UserRole);
-        var dole = await EnsureUserAsync(userManager, "dole@brukt.no", "Dole Duck", UserRole);
-        var doffen  = await EnsureUserAsync(userManager, "doffen@brukt.no",  "Doffen Duck", UserRole);
+        var ole  = await EnsureUserAsync(userManager, "ola@brukt.no",  "Ola Nordman", UserRole);
+        var dole = await EnsureUserAsync(userManager, "kari@brukt.no", "Kari Nordman", UserRole);
+        var doffen  = await EnsureUserAsync(userManager, "per@brukt.no",  "Per Pettersen", UserRole);
 
         // Er databasen allerede seedet, stopper vi her
         if (await context.Categories.AnyAsync()) return;
