@@ -19,11 +19,8 @@ public class CategoriesController(ICategoryService service) : ControllerBase
     [HttpGet("{id:int}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<CategoryDto>> GetById(int id)
-    {
-        var category = await service.GetByIdAsync(id);
-        return category == null ? NotFound() : Ok(category);
-    }
+    public async Task<ActionResult<CategoryDto>> GetById(int id) =>
+        Ok(await service.GetByIdAsync(id));
 
     // POST /api/categories
     [HttpPost]
@@ -35,10 +32,8 @@ public class CategoriesController(ICategoryService service) : ControllerBase
     [ProducesResponseType(StatusCodes.Status409Conflict)]
     public async Task<ActionResult<CategoryDto>> Create(CategoryRequestDto dto)
     {
-        var result = await service.CreateAsync(dto);
-        if (!result.IsSuccess) return this.ToErrorResult(result);
-
-        return CreatedAtAction(nameof(GetById), new { id = result.Value!.Id }, result.Value);
+        var category = await service.CreateAsync(dto);
+        return CreatedAtAction(nameof(GetById), new { id = category.Id }, category);
     }
 
     // PUT /api/categories/5
@@ -48,13 +43,8 @@ public class CategoriesController(ICategoryService service) : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
-    public async Task<ActionResult<CategoryDto>> Update(int id, CategoryRequestDto dto)
-    {
-        var result = await service.UpdateAsync(id, dto);
-        if (!result.IsSuccess) return this.ToErrorResult(result);
-
-        return Ok(result.Value);
-    }
+    public async Task<ActionResult<CategoryDto>> Update(int id, CategoryRequestDto dto) =>
+        Ok(await service.UpdateAsync(id, dto));
 
     // DELETE /api/categories/5
     [HttpDelete("{id:int}")]
@@ -64,9 +54,7 @@ public class CategoriesController(ICategoryService service) : ControllerBase
     [ProducesResponseType(StatusCodes.Status409Conflict)]
     public async Task<IActionResult> Delete(int id)
     {
-        var result = await service.DeleteAsync(id);
-        if (!result.IsSuccess) return this.ToErrorResult(result);
-
+        await service.DeleteAsync(id);
         return NoContent();
     }
 }

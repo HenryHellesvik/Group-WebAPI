@@ -1,4 +1,5 @@
 ﻿using Bruktborsen.Api.DTOs;
+using Bruktborsen.Api.Exceptions;
 using Bruktborsen.Api.Models;
 using Bruktborsen.Api.Repository;
 
@@ -6,60 +7,53 @@ namespace Bruktborsen.Api.Services;
 
 public class CategoryService(ICategoryRepository repository) : ICategoryService
 {
-    public async Task<List<CategoryDto>> GetAllAsync()
-    {
-        var categories = await repository.GetAllAsync();
-        return categories.Select(ToDto).ToList();
-    }
+    public async Task<List<CategoryDto>> GetAllAsync() =>
+        (await repository.GetAllAsync()).Select(ToDto).ToList();
 
-    public async Task<CategoryDto?> GetByIdAsync(int id)
-    {
-        var category = await repository.GetByIdAsync(id);
-        return category == null ? null : ToDto(category);
-    }
+    public async Task<CategoryDto> GetByIdAsync(int id) =>
+        ToDto(await GetCategoryOrThrowAsync(id));
 
-    public async Task<ServiceResult<CategoryDto>> CreateAsync(CategoryRequestDto dto)
+    public async Task<CategoryDto> CreateAsync(CategoryRequestDto dto)
     {
         var name = dto.Name.Trim();
 
         if (await repository.NameExistsAsync(name))
-            return ServiceResult<CategoryDto>.Fail(ServiceError.Conflict, $"Kategorien '{name}' finnes allerede.");
+            throw new ConflictException($"Kategorien '{name}' finnes allerede.");
 
         var category = new Category { Name = name };
         await repository.AddAsync(category);
 
-        return ServiceResult<CategoryDto>.Ok(ToDto(category));
+        return ToDto(category);
     }
 
-    public async Task<ServiceResult<CategoryDto>> UpdateAsync(int id, CategoryRequestDto dto)
+    public async Task<CategoryDto> UpdateAsync(int id, CategoryRequestDto dto)
     {
-        var category = await repository.GetByIdAsync(id);
-        if (category == null)
-            return ServiceResult<CategoryDto>.Fail(ServiceError.NotFound, "Kategorien finnes ikke.");
-
+        var category = await GetCategoryOrThrowAsync(id);
         var name = dto.Name.Trim();
+
         if (await repository.NameExistsAsync(name, excludeId: id))
-            return ServiceResult<CategoryDto>.Fail(ServiceError.Conflict, $"Kategorien '{name}' finnes allerede.");
+            throw new ConflictException($"Kategorien '{name}' finnes allerede.");
 
         category.Name = name;
         await repository.UpdateAsync(category);
 
-        return ServiceResult<CategoryDto>.Ok(ToDto(category));
+        return ToDto(category);
     }
 
-    public async Task<ServiceResult> DeleteAsync(int id)
+    public async Task DeleteAsync(int id)
     {
-        var category = await repository.GetByIdAsync(id);
-        if (category == null)
-            return ServiceResult.Fail(ServiceError.NotFound, "Kategorien finnes ikke.");
+        var category = await GetCategoryOrThrowAsync(id);
 
         // Forretningsregel: kategori med annonser kan ikke slettes
         if (await repository.HasListingsAsync(id))
-            return ServiceResult.Fail(ServiceError.Conflict, "Kategorien har annonser og kan ikke slettes.");
+            throw new ConflictException("Kategorien har annonser og kan ikke slettes.");
 
         await repository.DeleteAsync(category);
-        return ServiceResult.Ok();
     }
+
+    private async Task<Category> GetCategoryOrThrowAsync(int id) =>
+        await repository.GetByIdAsync(id)
+        ?? throw new NotFoundException("Kategorien finnes ikke.");
 
     private static CategoryDto ToDto(Category c) => new() { Id = c.Id, Name = c.Name };
 }
