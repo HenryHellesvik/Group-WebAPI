@@ -6,6 +6,9 @@ using Bruktborsen.Api.Repository;
 using Bruktborsen.Api.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Scalar.AspNetCore;
+
+const string blazorCorsPolicy = "BlazorClient";
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,22 +24,32 @@ builder.Services
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>();
 
-// Repository og services
+// Repository
+builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IListingRepository, ListingRepository>();
 builder.Services.AddScoped<IOfferRepository, OfferRepository>();
+builder.Services.AddScoped<IFavoriteRepository, FavoriteRepository>();
+
+// Services
+builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IOfferService, OfferService>();
+builder.Services.AddScoped<IFavoriteService, FavoriteService>();
 
 // Global feilhåndtering: ApiException -> ProblemDetails med riktig statuskode
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 
+// CORS for Blazor-klienten
+var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? [];
+builder.Services.AddCors(options =>
+    options.AddPolicy(blazorCorsPolicy, policy => policy
+        .WithOrigins(allowedOrigins)
+        .AllowAnyHeader()
+        .AllowAnyMethod()));
+
 // Enums som tekst ("Pending") i JSON, på samme måte som i databasen
 builder.Services.AddControllers()
     .AddJsonOptions(o => o.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
-
-// Kategorier
-builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
-builder.Services.AddScoped<ICategoryService, CategoryService>();
 
 builder.Services.AddOpenApi();
 
@@ -47,11 +60,13 @@ await DbSeeder.SeedAsync(app.Services);
 
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
+    app.MapOpenApi();               // /openapi/v1.json
+    app.MapScalarApiReference();    // /scalar
 }
 
 app.UseExceptionHandler();
 app.UseHttpsRedirection();
+app.UseCors(blazorCorsPolicy);      // før autentisering
 app.UseAuthentication();
 app.UseAuthorization();
 
