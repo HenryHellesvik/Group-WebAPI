@@ -2,11 +2,11 @@
 
 ## Testbrukere
 
-| E-post          | Passord   | Rolle |
-|-----------------|-----------|-------|
-| admin@brukt.no  | Passord1! | Admin |
-| ole@brukt.no    | Passord1! | User  |
-| dole@brukt.no   | Passord1! | User  |
-| doffen@brukt.no | Passord1! | User  |
+| E-post          | Passord     | Rolle |
+|-----------------|-------------|-------|
+| admin@brukt.no  | Passord123! | Admin |
+| ola@brukt.no    | Passord123! | User  |
+| kari@brukt.no   | Passord123! | User  |
+| per@brukt.no    | Passord123! | User  |
 
 Databasen migreres og seedes automatisk ved oppstart.
