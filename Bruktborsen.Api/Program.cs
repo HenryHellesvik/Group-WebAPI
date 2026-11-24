@@ -34,6 +34,8 @@ builder.Services.AddScoped<IFavoriteRepository, FavoriteRepository>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IOfferService, OfferService>();
 builder.Services.AddScoped<IFavoriteService, FavoriteService>();
+builder.Services.AddScoped<IListingService, ListingService>();
+builder.Services.AddScoped<IAnalyticsService, AnalyticsService>();
 
 // Global feilhåndtering: ApiException -> ProblemDetails med riktig statuskode
 builder.Services.AddProblemDetails();
