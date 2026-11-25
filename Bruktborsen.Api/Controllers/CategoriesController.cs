@@ -1,4 +1,5 @@
 ﻿using Bruktborsen.Api.DTOs;
+using Bruktborsen.Api.DTOs.Category;
 using Bruktborsen.Api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Bruktborsen.Api.DTOs;
+namespace Bruktborsen.Api.DTOs.Category;
 
 // Output
 public class CategoryDto
