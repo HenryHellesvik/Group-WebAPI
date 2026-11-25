@@ -1,0 +1,156 @@
+﻿@host = http://localhost:5242
+
+##### INNLOGGING / AUTH 
+
+### Admin
+POST {{host}}/api/auth/login
+Content-Type: application/json
+
+{ "email": "admin@brukt.no", "password": "Passord1!" }
+> {% client.global.set("admin", response.body.accessToken); %}
+
+### Ola
+POST {{host}}/api/auth/login
+Content-Type: application/json
+
+{ "email": "ola@brukt.no", "password": "Passord1!" }
+> {% client.global.set("ola", response.body.accessToken); %}
+
+### Kari
+POST {{host}}/api/auth/login
+Content-Type: application/json
+
+{ "email": "kari@brukt.no", "password": "Passord1!" }
+> {% client.global.set("kari", response.body.accessToken); %}
+
+### Per
+POST {{host}}/api/auth/login
+Content-Type: application/json
+
+{ "email": "per@brukt.no", "password": "Passord1!" }
+> {% client.global.set("per", response.body.accessToken); %}
+
+### Hvem er jeg? (id, e-post, navn, roller)
+GET {{host}}/api/auth/me
+Authorization: Bearer {{admin}}
+
+##### BUD / ANNONSER 
+
+### Kari lager annonse ( 200 )
+POST {{host}}/api/listings
+Authorization: Bearer {{kari}}
+Content-Type: application/json
+
+{ "title":  "FUN Enhjulssykkel", "categoryId": 2, "Condition": "New", "price": 1500 }
+> {% client.global.set("oneWheel", response.body.id) %}
+
+### Per gir bud ( 201 )
+POST {{host}}/api/listings/{{oneWheel}}/offers
+Authorization: Bearer {{per}}
+Content-Type: application/json
+
+{ "amount": 1400 }
+
+> {% client.global.set("perOffer", response.body.id); %}
+
+### Kari byr på egen annonse    ( 400 )
+POST {{host}}/api/listings/{{oneWheel}}/offers
+Authorization: Bearer {{kari}}
+Content-Type: application/json
+
+{ "amount": 1600 }
+
+### Per byr en gang til mens første bud er Pending  ( 409 )
+POST {{host}}/api/listings/{{oneWheel}}/offers
+Authorization: Bearer {{per}}
+Content-Type: application/json
+
+{ "amount": 1500 }
+
+### Ola byr under 50% (749 av 1500kr)  ( 400 )
+POST {{host}}/api/listings/{{oneWheel}}/offers
+Authorization: Bearer {{ola}}
+Content-Type: application/json
+
+{ "amount": 749 }
+
+### Ola byr nøyaktig 50% (750kr)   ( 201 )
+POST {{host}}/api/listings/{{oneWheel}}/offers
+Authorization: Bearer {{ola}}
+Content-Type: application/json
+
+{ "amount": 750 }
+
+### Ola prøver å se budene på Karis annonse  ( 403 )
+GET {{host}}/api/listings/{{oneWheel}}/offers
+Authorization: Bearer {{ola}}
+
+### Kari ser budene på sin annonse  ( 200 )
+GET {{host}}/api/listings/{{oneWheel}}/offers
+Authorization: Bearer {{kari}}
+
+### Ola prøver å akseptere  ( 403 )
+POST {{host}}/api/offers/{{perOffer}}/accept
+Authorization: Bearer {{ola}}
+
+### Kari aksepterer Pers bud  ( 200 )
+POST {{host}}/api/offers/{{perOffer}}/accept
+Authorization: Bearer {{kari}}
+
+### Annonsen er nå Sold med SoldPrice og SoldDate
+GET {{host}}/api/listings/{{oneWheel}}
+
+### Olas bud ble automatisk Rejected
+GET {{host}}/api/offers/my
+Authorization: Bearer {{ola}}
+
+### Bud på solgt annonse  ( 409 )
+POST {{host}}/api/listings/{{oneWheel}}/offers
+Authorization: Bearer {{ola}}
+Content-Type: application/json
+
+{ "amount": 1700 }
+
+### Kari prøver å endre solgt annonse ( 409 )
+PUT {{host}}/api/listings/{{oneWheel}}
+Authorization: Bearer {{kari}}
+Content-Type: application/json
+
+{ "title": "FUN Enhjulssykkel", "price": 2000, "condition": "New", "categoryId": 2 }
+
+
+
+###### ANALYSE
+
+### Prisvurdering HØY: iPhone 12 til 25 000 kr
+GET {{host}}/api/listings/10
+
+### Prisvurdering LAV: Trek Marlin til 2 500 kr
+GET {{host}}/api/listings/23
+
+### Prisvurdering NORMAL: Google Pixel 7
+GET {{host}}/api/listings/11
+
+### Prisvurdering UKJENT: Friluft har bare 2 salg
+GET {{host}}/api/listings/47
+
+
+
+### Prisforslag Sykkel, Good = 6430
+GET {{host}}/api/analytics/price-suggestion?categoryId=2&condition=Good
+Authorization: Bearer {{ola}}
+
+### Prisforslag Friluft = "ikke nok data"
+GET {{host}}/api/analytics/price-suggestion?categoryId=4&condition=Good
+Authorization: Bearer {{ola}}
+
+### Prisforslag uten innlogging  ( 401 )
+GET {{host}}/api/analytics/price-suggestion?categoryId=2&condition=Good
+
+
+
+### Kategoristatistikk Sykkel
+GET {{host}}/api/analytics/categories/2/stats
+
+### Oversikt over alle kategorier
+GET {{host}}/api/analytics/overview
