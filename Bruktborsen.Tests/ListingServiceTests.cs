@@ -1,4 +1,5 @@
 ﻿using Bruktborsen.Api.Data;
+using Bruktborsen.Api.DTOs.Analytics;
 using Bruktborsen.Api.DTOs.Listings;
 using Bruktborsen.Api.Exceptions;
 using Bruktborsen.Api.Models.Enums;
@@ -119,5 +120,18 @@ public class ListingServiceTests : IDisposable
     {
         public Task<PriceAssessment> AssessPriceAsync(int categoryId, Condition condition, int price) =>
             Task.FromResult(PriceAssessment.Unknown);
+
+        // ListingService bruker bare AssessPriceAsync. Resten er ikke i bruk i disse testene.
+        public Task<PriceSuggestionDto> GetPriceSuggestionAsync(int categoryId, Condition condition) =>
+            throw new NotSupportedException();
+
+        public Task<CategoryStatsDto> GetCategoryStatsAsync(int categoryId) =>
+            throw new NotSupportedException();
+
+        public Task<List<CategoryStatsDto>> GetOverviewAsync() =>
+            throw new NotSupportedException();
+
+        public Task<PriceHistoryDto> GetPriceHistoryAsync(int listingId) =>
+            throw new NotSupportedException();
     }
 }
