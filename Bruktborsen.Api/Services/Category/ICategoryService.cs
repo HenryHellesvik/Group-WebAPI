@@ -1,4 +1,5 @@
 ﻿using Bruktborsen.Api.DTOs;
+using Bruktborsen.Api.DTOs.Category;
 
 namespace Bruktborsen.Api.Services;
 

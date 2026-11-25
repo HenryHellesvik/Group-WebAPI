@@ -1,4 +1,5 @@
 ﻿using Bruktborsen.Api.DTOs;
+using Bruktborsen.Api.DTOs.Category;
 using Bruktborsen.Api.Exceptions;
 using Bruktborsen.Api.Models;
 using Bruktborsen.Api.Repository;

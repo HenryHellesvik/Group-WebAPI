@@ -113,7 +113,8 @@ public class ListingServiceTests : IDisposable
         await Assert.ThrowsAsync<BadRequestException>(
             () => _service.SearchAsync(new ListingQueryDto { Sort = "cheapest" }));
     }
-
+    
+    
     private class FakeAnalyticsService : IAnalyticsService
     {
         public Task<PriceAssessment> AssessPriceAsync(int categoryId, Condition condition, int price) =>
